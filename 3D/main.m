@@ -1,7 +1,7 @@
 clear; close all; clc;
 
 addpath(genpath(('../third_party')));
-modelsDir = '../../3dmodels/';
+modelsDir = '../3dmodels/';
 
 %% Parameters
 modelName = 'jerboa';
