@@ -1,6 +1,5 @@
-function [rotatedObject, slices] = calculateSlices( object, theta, phi )
+function [R, slices] = calculateSlices( object, theta, phi )
     
-    %rotatedImage = imrotate(binaryImage, angle, 'nearest', 'crop');
     R = calRotationMatrix(theta, phi, size(object));
     rotatedObject = R*object(:);
     rotatedObject = reshape(rotatedObject, size(object));
