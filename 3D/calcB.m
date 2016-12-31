@@ -1,5 +1,6 @@
 function B = calcB(angles,boxSize)
-    B = sparse(size(angles,1)*boxSize(3), boxSize(1)*boxSize(2)*boxSize(3));
+    %B = sparse(size(angles,1)*boxSize(1), boxSize(1)*boxSize(2)*boxSize(3));
+    B = sparse(0,0);
     anglesInBatch = 20;
     numberOfBatches = ceil(size(angles,1) / anglesInBatch);
     for i =1:numberOfBatches
@@ -11,7 +12,7 @@ function B = calcB(angles,boxSize)
         end
         tic
         B = [B; calcB_inBatches(angles(startAngles:endAngles,:),boxSize)];
-         disp(['Added to large B: ', num2str(ceil(toc)),'[sec]']);
+        disp(['Added to large B: ', num2str(ceil(toc)),'[sec]']);
     end
 end
 
