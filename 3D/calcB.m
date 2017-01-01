@@ -1,22 +1,36 @@
 function B = calcB(angles,boxSize)
     B = sparse(size(angles,1)*boxSize(3), boxSize(1)*boxSize(2)*boxSize(3));
-    anglesInBatch = 20;
+    sizeB = size(angles,1)*boxSize(3) * boxSize(1)*boxSize(2)*boxSize(3);
+    %B = spalloc(size(angles,1)*boxSize(3), boxSize(1)*boxSize(2)*boxSize(3), );
+
+    anglesInBatch = 450 ;
+    
     numberOfBatches = ceil(size(angles,1) / anglesInBatch);
+    disp('Generating S...');
+
+    S_tilde = sparse(flipud(sumZplains(boxSize)));
+    S = sparse(kron(eye(anglesInBatch), S_tilde));
+
     for i =1:numberOfBatches
         disp(['batch ',num2str(i),'/',num2str(numberOfBatches)]);
         startAngles = (i-1)*anglesInBatch + 1;
         endAngles = i*anglesInBatch;
+        
         if i == numberOfBatches
             endAngles = size(angles, 1);
         end
+        if (i == numberOfBatches) && ((endAngles - startAngles + 1) ~= anglesInBatch) % Last batch may not have numAngles = anglesInBatch
+           S = sparse(kron(eye(endAngles - startAngles + 1), S_tilde));
+        end
+        
         tic
-        B = [B; calcB_inBatches(angles(startAngles:endAngles,:),boxSize)];
-         disp(['Added to large B: ', num2str(ceil(toc)),'[sec]']);
+        B((((startAngles-1)*boxSize(3))+1):(endAngles*boxSize(3)) ,:) = calcB_inBatches(angles(startAngles:endAngles,:),boxSize, S);
+        disp(['Added to large B: ', num2str(round(toc)),'[sec]']);
     end
 end
 
-function B = calcB_inBatches(angles,boxSize)
-
+function B = calcB_inBatches(angles,boxSize, S)
+    tic
     volume = boxSize(1)*boxSize(2)*boxSize(3);
     R_theta = zeros(3*size(angles,1),3);
     disp('Concatenating R_theta...');
@@ -29,8 +43,8 @@ function B = calcB_inBatches(angles,boxSize)
     Y = Y - ceil(boxSize(1)/2);
     Z = Z - ceil(boxSize(3)/2);
     disp('Calculating origins...');
-    origin = R_theta*[Y(:),X(:),Z(:)]';
-    origin = permute(reshape(origin',volume,3,size(angles,1)),[2,1,3]);
+    origin = [Y(:),X(:),Z(:)]*R_theta';
+    origin = permute(reshape(origin,volume,3,size(angles,1)),[2,1,3]);
     origin = reshape(origin,3,volume*size(angles,1));
     origin(1,:) = origin(1,:) + ceil(boxSize(1)/2);
     origin(2,:) = origin(2,:) + ceil(boxSize(2)/2);
@@ -40,19 +54,15 @@ function B = calcB_inBatches(angles,boxSize)
         (origin(2,:)>=1).*(origin(2,:)<=boxSize(2)).*(origin(3,:)>=1).*(origin(3,:)<=boxSize(3)));
     origin = round(origin); %In case of nearest neighbor approximation
     colIndices = sub2ind(boxSize,origin(1,rowIndices),origin(2,rowIndices),origin(3,rowIndices));
-    
+    disp(['Preparing data time: ',num2str(round(toc)), '[sec]']);
     tic
     disp('Generating R...');
     R = sparse(rowIndices, colIndices, ones(length(rowIndices),1),volume*size(angles,1),volume);
-    timeR = ceil(toc);
-    tic
-    disp('Generating S...');
-    S = sparse(kron(eye(size(angles,1)),sparse(flipud(sumZplains(boxSize)))));
-    timeS = ceil(toc);
+    timeR = round(toc);
     tic
     disp('Generating B=S*R...');
     B = S*R;
-    timeSR = ceil(toc);
-    disp(['Done B_batch. R: ',num2str(timeR), '[sec], S: ', num2str(timeS), '[sec], S*R: ', num2str(timeSR),'[sec]']);
+    timeSR = round(toc);
+    disp(['Done B_batch. R: ',num2str(timeR), '[sec], S*R: ', num2str(timeSR),'[sec]']);
     
 end
