@@ -1,10 +1,8 @@
 function B = calcB(angles,boxSize)
-    B = sparse(size(angles,1)*boxSize(3), boxSize(1)*boxSize(2)*boxSize(3));
-    sizeB = size(angles,1)*boxSize(3) * boxSize(1)*boxSize(2)*boxSize(3);
-    %B = spalloc(size(angles,1)*boxSize(3), boxSize(1)*boxSize(2)*boxSize(3), );
+    %B = sparse(size(angles,1)*boxSize(1), boxSize(1)*boxSize(2)*boxSize(3));
+    B = sparse(0,0);
+    anglesInBatch = 20;
 
-    anglesInBatch = 450 ;
-    
     numberOfBatches = ceil(size(angles,1) / anglesInBatch);
     disp('Generating S...');
 
@@ -24,8 +22,12 @@ function B = calcB(angles,boxSize)
         end
         
         tic
-        B((((startAngles-1)*boxSize(3))+1):(endAngles*boxSize(3)) ,:) = calcB_inBatches(angles(startAngles:endAngles,:),boxSize, S);
-        disp(['Added to large B: ', num2str(round(toc)),'[sec]']);
+
+        %B((((startAngles-1)*boxSize(3))+1):(endAngles*boxSize(3)) ,:) = calcB_inBatches(angles(startAngles:endAngles,:),boxSize, S);
+        
+
+        B = [B; calcB_inBatches(angles(startAngles:endAngles,:),boxSize, S)];
+        disp(['Added to large B: ', num2str(ceil(toc)),'[sec]']);
     end
 end
 

@@ -4,9 +4,9 @@ addpath(genpath(('../third_party')));
 modelsDir = '../3dmodels/';
 
 %% Parameters
-modelName = 'octopus';
+modelName = 'HUMAN_HAND';
 
-resolution = 80;
+resolution = 120;
 
 pad = floor( ((sqrt(3) - 1)/(2 * sqrt(3))) * resolution + 1);
 numberOfAngles = (resolution)^2;
