@@ -4,9 +4,9 @@ addpath(genpath(('../third_party')));
 modelsDir = '../3dmodels/';
 
 %% Parameters
-modelName = 'octopus';
+modelName = 'stanford_dragon';
 
-resolution = 20;
+resolution = 120;
 
 pad = floor( ((sqrt(3) - 1)/(2 * sqrt(3))) * resolution + 1);
 numberOfAngles = (resolution)^2;
