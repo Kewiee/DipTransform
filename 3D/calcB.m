@@ -1,8 +1,11 @@
 function B = calcB(angles,boxSize)
     %B = sparse(size(angles,1)*boxSize(1), boxSize(1)*boxSize(2)*boxSize(3));
     B = sparse(0,0);
-    anglesInBatch = 20;
+    anglesInBatch = round(size(angles,1)/3);
 
+    if anglesInBatch < 1
+        anglesInBatch = 1;
+    end
     numberOfBatches = ceil(size(angles,1) / anglesInBatch);
     disp('Generating S...');
 

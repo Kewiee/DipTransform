@@ -9,5 +9,12 @@ function [h] = showVoxel( voxel, name )
     [vertices,faces,normals,~] = stlRead(tempFilePath);
     h = stlPlot(vertices,faces,name);
     delete(tempFilePath);
+    grid off;   
+%     set(gca, 'box', 'off') ;
+%     set(gca, 'xtick', [], 'ytick', [], 'ztick',[]) ;
+%     set(gca, 'xcolor', 'w', 'ycolor', 'w','zcolor','w') ;
+%     set(gca,'Color',[0 0 0]);
+    %set(gca, 'visible', 'on') ;
+    set(gca, 'visible', 'off') ;
 end
 
