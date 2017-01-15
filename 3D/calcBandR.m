@@ -1,7 +1,8 @@
-function B = calcB(angles,boxSize)
+function [B,R] = calcBandR(angles,boxSize)
     %B = sparse(size(angles,1)*boxSize(1), boxSize(1)*boxSize(2)*boxSize(3));
     B = sparse(0,0);
-    anglesInBatch = size(angles,1);%round(size(angles,1)/3);
+    R = sparse(0,0);
+    anglesInBatch = round(size(angles,1)/3);
 
     if anglesInBatch < 1
         anglesInBatch = 1;
@@ -23,18 +24,18 @@ function B = calcB(angles,boxSize)
         if (i == numberOfBatches) && ((endAngles - startAngles + 1) ~= anglesInBatch) % Last batch may not have numAngles = anglesInBatch
            S = sparse(kron(eye(endAngles - startAngles + 1), S_tilde));
         end
-        
         tic
 
         %B((((startAngles-1)*boxSize(3))+1):(endAngles*boxSize(3)) ,:) = calcB_inBatches(angles(startAngles:endAngles,:),boxSize, S);
         
-
-        B = [B; calcB_inBatches(angles(startAngles:endAngles,:),boxSize, S)];
+        [Bi,Ri] = calcB_inBatches(angles(startAngles:endAngles,:),boxSize, S);
+        B = [B; Bi];
+        R = [R; Ri];
         disp(['Added to large B: ', num2str(ceil(toc)),'[sec]']);
     end
 end
 
-function B = calcB_inBatches(angles,boxSize, S)
+function [B, R] = calcB_inBatches(angles,boxSize, S)
     tic
     volume = boxSize(1)*boxSize(2)*boxSize(3);
     R_theta = zeros(3*size(angles,1),3);
