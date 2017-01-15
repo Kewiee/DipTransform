@@ -9,14 +9,16 @@ function y = resampleDip(v,d,S,n,interpolationMethod)
     slicesHeightDiff = waterHeightDiff + d;
     slicesHeightAccumulated = cumsum([0; slicesHeightDiff]);
     volumesAccumulated = cumsum([0; waterHeightDiff*S]);
-    figure;
-    stem(slicesHeightAccumulated,volumesAccumulated);
+    %figure;
+    %stem(slicesHeightAccumulated,volumesAccumulated,'fill');
     newX = linspace(0,slicesHeightAccumulated(end),n);
     y = interp1(slicesHeightAccumulated,volumesAccumulated,newX,interpolationMethod);
-    hold on;
-    scatter(newX,y,'fill');
-    xlabel('Water Height [mm]','interpreter','latex');
-    ylabel('Accumulated slices volume [$\textrm{mm}^3$]','interpreter','latex');
-    legend('Original','Resampled');
-    
+    %hold on; plot(newX,y,'LineWidth',2,'color',[0 0.5 0]);
+    %hold on; scatter(newX,y,'r','o');
+    %xlabel('Accumulated height [mm]','interpreter','latex');
+    %ylabel('Accumulated volume [$\textrm{mm}^3$]','interpreter','latex');
+    %h = legend('Original','Continuous','Resampled');
+    %set(h,'FontSize',16);
+    %set(gca,'cameraupvector',[1 0 0]);
+    %axis ij;
 end

@@ -1,37 +1,47 @@
-function sliceToAlgorithm = resampleAlignAndSmooth(v, n, d, S, BBlength, z, theta)
+function sliceToAlgorithm = resampleAlignAndSmooth(v, n, d, S, BBlength, z, theta, frame)
     
-    %Reduce dZ from the starting points (optional)
-    if (nargin > 5)
-        v = modifyStartPoint(v,d,z,theta);
+    %Caluclate frame volume
+    if (nargin > 7)
+        frmaeInBB = samplesToBB(frame,d,BBlength);
+        frameResampled = resampleDip(frmaeInBB,d,S,n+1,'spline');       
+    else
+        frameResampled = zeros(1,n+1);        
     end
-
+    
+    %Reduce dZ from the starting points
+    v = modifyStartPoint(v,d,z,theta);
+    
     %Select the samples which are relevant to the BB size (otherwise complete)
     vInBB = samplesToBB(v,d,BBlength);
     
     %Interpolationg
-    volumesResampled = resampleDip(vInBB,d,S,n,'spline');
+    volumesResampled = resampleDip(vInBB,d,S,n+1,'spline');    
+    volumesResampled = volumesResampled - frameResampled;
     volumesDiff = diff(volumesResampled);
     voxelVolume = (BBlength/n)^3;
     sliceToAlgorithm = volumesDiff/voxelVolume;
     
     %Smoothing
-    figure; plot(1:length(sliceToAlgorithm),sliceToAlgorithm);
+    %figure; plot(1:length(sliceToAlgorithm),sliceToAlgorithm);
     gaussFilter = gausswin(5);
     sliceToAlgorithm = conv(sliceToAlgorithm, gaussFilter/sum(gaussFilter),'same');
-
-    hold on; plot(1:length(sliceToAlgorithm),sliceToAlgorithm,'r');
     
 end
  
 function vCorrected = modifyStartPoint(v,d,z,theta)
     
+    if (z == 0)
+        vCorrected = v;
+        return;
+    end
+      
     dz = z*(1-cos(deg2rad(theta)));
     
     samplesIn_dz = floor(dz/d);
     if (samplesIn_dz > length(v))
         vCorrected = [];
     else
-        vCorrected = v(samplesIn_dz:length(v));
+        vCorrected = v((samplesIn_dz+1):length(v));
     end
     
     
@@ -43,9 +53,9 @@ function vInBB = samplesToBB(v,d,BBlength)
     
     assert(length(v) == length(slicesHeightAccumulated));
     
-    stem(1:length(slicesHeightAccumulated),slicesHeightAccumulated);
-    hold on;
-    plot(1:length(v),BBlength*ones(1,length(v)),'r');
+    %figure;stem(1:length(slicesHeightAccumulated),slicesHeightAccumulated);
+    %hold on;
+    %plot(1:length(v),BBlength*ones(1,length(v)),'r');
     
     if (slicesHeightAccumulated(end) < BBlength)
         holes = floor((BBlength - slicesHeightAccumulated(end))/d);
@@ -59,7 +69,10 @@ function vInBB = samplesToBB(v,d,BBlength)
       end        
     end
     
-    hold on; stem(1:length(vInBB),vInBB,'x');
+    %hold on; stem(1:length(vInBB),vInBB,'x');
+    %xlabel('Sample','interpreter','latex');
+    %ylabel('Height [mm]','interpreter','latex');
+    
 end
 
 function slicesHeightAccumulated = measures2height(v,d)
